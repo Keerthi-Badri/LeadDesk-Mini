@@ -215,6 +215,7 @@ def admin_login():
 
     except Exception as e:
 
+        print("LOGIN ERROR:", e)
 
         return jsonify({
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import API from "../services/api";
 
 function Admin() {
@@ -7,148 +7,320 @@ function Admin() {
   const [leads, setLeads] = useState([]);
   const [search, setSearch] = useState("");
 
+  const navigate = useNavigate();
+
+
   useEffect(() => {
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/admin-login");
+      return;
+    }
+
     fetchLeads();
+
   }, []);
 
 
+
   const fetchLeads = async () => {
+
     try {
+
       const response = await API.get("/api/leads", {
+
         headers: {
+
           Authorization: `Bearer ${localStorage.getItem("token")}`
+
         }
+
       });
+
+
       setLeads(response.data);
+
+
     } catch (error) {
+
+
       console.error("Error fetching leads:", error);
+
+
+      if (error.response && error.response.status === 401) {
+
+        localStorage.removeItem("token");
+        navigate("/admin-login");
+
+      }
+
+
     }
+
   };
+
 
 
   const updateStatus = async (id, status) => {
 
     try {
 
+
       await API.put(
+
         `/api/leads/${id}`,
+
         {
           status: status
         },
+
         {
+
           headers: {
+
             Authorization: `Bearer ${localStorage.getItem("token")}`
+
           }
+
         }
+
       );
+
 
       fetchLeads();
 
+
     } catch (error) {
+
       console.error("Error updating status:", error);
+
     }
 
   };
 
 
-  const filteredLeads = leads.filter((lead) =>
-    lead.name.toLowerCase().includes(search.toLowerCase()) ||
-    lead.email.toLowerCase().includes(search.toLowerCase())
-  );
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const logout = () => {
+
+    localStorage.removeItem("token");
+
+    navigate("/admin-login");
+
   };
 
+
+
+  const filteredLeads = leads.filter((lead) =>
+
+    lead.name.toLowerCase().includes(search.toLowerCase()) ||
+
+    lead.email.toLowerCase().includes(search.toLowerCase())
+
+  );
+
+
+
+  const formatDate = (date) => {
+
+    return new Date(date).toLocaleString("en-IN", {
+
+      day: "2-digit",
+
+      month: "short",
+
+      year: "numeric",
+
+      hour: "2-digit",
+
+      minute: "2-digit",
+
+    });
+
+  };
+
+
+
   return (
+
     <div className="admin-container">
 
+
       <h1>Admin Dashboard</h1>
-      <Link className="back-link" to="/">
-        Back to Home
-      </Link>
+
+
+      <div>
+
+        <Link className="back-link" to="/">
+
+          Back to Home
+
+        </Link>
+
+
+        <button
+
+          onClick={logout}
+
+          style={{
+
+            marginLeft: "20px",
+
+            padding: "8px 15px",
+
+            cursor: "pointer"
+
+          }}
+
+        >
+
+          Logout
+
+        </button>
+
+
+      </div>
+
+
+
+      <br />
 
 
       <input
+
         className="search-box"
+
         type="text"
+
         placeholder="Search by name or email"
+
         value={search}
+
         onChange={(e) => setSearch(e.target.value)}
+
         style={{
+
           padding: "10px",
+
           width: "300px",
+
           marginBottom: "20px"
+
         }}
+
       />
+
 
 
       <table border="1" cellPadding="10">
 
+
         <thead>
 
           <tr>
+
             <th>Name</th>
+
             <th>Email</th>
+
             <th>Budget</th>
+
             <th>Message</th>
+
             <th>Status</th>
+
             <th>Date</th>
+
           </tr>
 
         </thead>
 
 
+
         <tbody>
 
-          {
-            filteredLeads.map((lead) => (
 
-              <tr key={lead.id}>
+          {filteredLeads.map((lead) => (
 
-                <td>{lead.name}</td>
 
-                <td>{lead.email}</td>
+            <tr key={lead.id}>
 
-                <td>{lead.budget}</td>
 
-                <td>{lead.message}</td>
+              <td>{lead.name}</td>
 
-                <td>
 
-                  <select
-                    value={`status-${lead.status.toLowerCase()}`}
-                    value={lead.status}
-                    onChange={(e) =>
-                      updateStatus(
-                        lead.id,
-                        e.target.value
-                      )
-                    }
-                  >
+              <td>{lead.email}</td>
 
-                    <option>New</option>
-                    <option>Contacted</option>
-                    <option>Closed</option>
 
-                  </select>
+              <td>{lead.budget}</td>
 
-                </td>
 
-                <td>
-                  {formatDate(lead.created_at)}
-                </td>
+              <td>{lead.message}</td>
 
-              </tr>
 
-            ))
-          }
+
+              <td>
+
+
+                <select
+
+                  value={lead.status}
+
+                  onChange={(e) =>
+
+                    updateStatus(
+
+                      lead.id,
+
+                      e.target.value
+
+                    )
+
+                  }
+
+                >
+
+
+                  <option value="New">
+
+                    New
+
+                  </option>
+
+
+                  <option value="Contacted">
+
+                    Contacted
+
+                  </option>
+
+
+                  <option value="Closed">
+
+                    Closed
+
+                  </option>
+
+
+                </select>
+
+
+              </td>
+
+
+
+              <td>
+
+                {formatDate(lead.created_at)}
+
+              </td>
+
+
+            </tr>
+
+
+          ))}
 
 
         </tbody>
@@ -157,8 +329,11 @@ function Admin() {
       </table>
 
 
+
     </div>
+
   );
+
 }
 
 
