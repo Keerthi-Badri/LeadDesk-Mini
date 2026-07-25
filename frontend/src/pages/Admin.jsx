@@ -14,7 +14,11 @@ function Admin() {
 
   const fetchLeads = async () => {
     try {
-      const response = await API.get("/api/leads");
+      const response = await API.get("/api/leads", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
       setLeads(response.data);
     } catch (error) {
       console.error("Error fetching leads:", error);
@@ -26,9 +30,17 @@ function Admin() {
 
     try {
 
-      await API.put(`/api/leads/${id}`, {
-        status: status
-      });
+      await API.put(
+        `/api/leads/${id}`,
+        {
+          status: status
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
+        }
+      );
 
       fetchLeads();
 
