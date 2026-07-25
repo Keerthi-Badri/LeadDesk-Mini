@@ -22,7 +22,7 @@ function Home() {
 
 
       <footer>
-        Built for Digital Hero
+        Built for Digital Heroes
       </footer>
 
     </div>
