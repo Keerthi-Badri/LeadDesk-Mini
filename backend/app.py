@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from database import get_connection
+from backend.database import get_connection
 
 from flask_jwt_extended import (
     JWTManager,
